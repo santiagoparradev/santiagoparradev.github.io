@@ -9,7 +9,7 @@ description: "short solution when dealing with ssh keys"
 
 ## 🚩 **The Problem**
 
-You’ve gone through the process of creating an SSH key for authentication, but now you want to use it with your Git repositories without hassle..
+You’ve gone through the process of creating an SSH key for authentication, but now you want to use it with your Git repositories without hassle.
 
 ---
 
@@ -31,7 +31,7 @@ Here’s an example:
 Host work.github.com
     User git
     HostName github.com
-    IdentityFile /c/Users/santi/.ssh/santiago@attentisconsulting.com/id_ed25519
+    IdentityFile /c/Users/santi/.ssh/santiago@workgmail.com/id_ed25519
     IdentitiesOnly yes
 
 # Key for personal GitHub
