@@ -9,7 +9,7 @@ description: "short solution when dealing with ssh keys"
 
 ## 🚩 **The Problem**
 
-You’ve gone through the process of creating an SSH key for authentication, but now you want to use it with your Git repositories without hassle.
+You’ve gone through the process of creating an SSH key for authentication, but now you want to use it with your Git repositories without hassle..
 
 ---
 
