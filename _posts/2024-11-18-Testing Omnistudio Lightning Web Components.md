@@ -34,75 +34,78 @@ export default class OmnistudioLightningWebComponent extends OmniscriptBaseMixin
 
 ```plaintext
 .
-├── 📁 test
-│   └── 📁 utils
-│       └── 📄 omnistudio.js
 ├── 📁 force-app
-│   └── 📁 main
-│       └── 📁 default
-│           └── 📁 lwc
-│               └── 📁 omnistudioLightningWebComponent
-│                   ├── 📁 __tests__
-│                   │   └── 📄 omnistudioLightningWebComponent.test.js
-│                   └── 📄 omnistudioLightningWebComponent.js
+│   ├── 📁 main
+│   │   └── 📁 default
+│   │       └── 📁 lwc
+│   │           └── 📁 omnistudioLightningWebComponent
+│   │               ├── 📁 __tests__
+│   │               │   └── 📄 omnistudioLightningWebComponent.test.js
+│   │               └── 📄 omnistudioLightningWebComponent.js
+│   └── 📁 test
+│       └── 📁 jest-mocks
+│           └── 📁 omnistudio
+│               └── 📄 omniscriptBaseMixin.js
 └── 📄 jest.config.js
 ```
 
 ---
 
-### 1️⃣ **Create `omnistudio.js`**  
+### 1️⃣ **Create `omniscriptBaseMixin.js`**  
 
 🎯 Create the mock implementation for  `OmniscriptBaseMixin` for your tests.  
 
 ```javascript
-function mockOmniscriptBaseMixing(omniscriptBaseMixingModuleName) {
-  const { OmniscriptBaseMixin } = require(omniscriptBaseMixingModuleName);
+const OmniscriptBaseMixin = jest.fn();
 
-  jest.mock(
-    omniscriptBaseMixingModuleName,
-    () => ({
-      OmniscriptBaseMixin: jest.fn(),
-    }),
-    { virtual: true }
-  );
+OmniscriptBaseMixin.mockImplementation((Base) => {
+  OmniscriptBaseMixin.instances = [];
+  
+  return class extends Base {
 
-  OmniscriptBaseMixin.mockImplementation(Base => {
-    OmniscriptBaseMixin.mock.instances = [];
+    mockProperty(propName) {
+      Object.defineProperty(this, propName, {
+        get: jest.fn(() => this[`_${propName}`]),
+        set: jest.fn((value) => {
+          this[`_${propName}`] = value;
+        }),
+      });
+    }
 
-    return class extends Base {
-      constructor() {
-        super();
-        this.checkValidity = jest.fn();
-        this.dataLayout = jest.fn();
-        this.omniApplyCallResp = jest.fn();
-        this.omniCustomState = jest.fn();
-        this.omniGetMergeField = jest.fn();
-        this.omniGetSaveState = jest.fn();
-        this.omniJsonData = jest.fn();
-        this.omniJsonDataStr = jest.fn();
-        this.omniJsonDef = jest.fn();
-        this.omniNavigateTo = jest.fn();
-        this.omniNextStep = jest.fn();
-        this.omniPrevStep = jest.fn();
-        this.omniRemoteCall = jest.fn();
-        this.omniResume = jest.fn();
-        this.omniSaveForLater = jest.fn();
-        this.omniSaveState = jest.fn();
-        this.omniScriptHeaderDef = jest.fn();
-        this.omniSeedJson = jest.fn();
-        this.omniUpdateDataJson = jest.fn();
-        this.omniValidate = jest.fn();
-        this.reportValidity = jest.fn();
-        this.showValidation = jest.fn();
-        OmniscriptBaseMixin.mock.instances.push(this);
-      }
-    };
-  });
+    constructor() {
+      super();
 
-  return OmniscriptBaseMixin;
-}
+      // properties
+      this.mockProperty('omniJsonData');
+      this.mockProperty('omniJsonDef');
+      this.mockProperty('omniSeedJson');
+      this.mockProperty('omniResume');
+      this.mockProperty('omniScriptHeaderDef');
+      this.mockProperty('omniJsonDataStr');
+      this.mockProperty('omniCustomState');
+      this.mockProperty('dataLayout');
+      this.mockProperty('showValidation');
 
-export { mockOmniscriptBaseMixing };
+      // methods
+      this.checkValidity = jest.fn();
+      this.omniApplyCallResp = jest.fn();
+      this.omniGetMergeField = jest.fn();
+      this.omniGetSaveState = jest.fn();
+      this.omniNavigateTo = jest.fn();
+      this.omniNextStep = jest.fn();
+      this.omniPrevStep = jest.fn();
+      this.omniRemoteCall = jest.fn();
+      this.omniSaveForLater = jest.fn();
+      this.omniSaveState = jest.fn();
+      this.omniUpdateDataJson = jest.fn();
+      this.omniValidate = jest.fn();
+      this.reportValidity = jest.fn();
+      OmniscriptBaseMixin.instances.push(this);
+    }
+  };
+});
+
+export { OmniscriptBaseMixin };
 ```
 
 ---
@@ -119,54 +122,78 @@ module.exports = {
     modulePathIgnorePatterns: ['<rootDir>/.localdevserver'],
     testMatch: ['**/__tests__/**/*.test.js'],
     moduleNameMapper: {
-        '^utils/omnistudio$': '<rootDir>/test/utils/omnistudio.js',
+        '^omnistudio/omniscriptBaseMixin$': '<rootDir>/force-app/test/jest-mocks/omniscriptBaseMixin.js',
     }
 };
 ```
+👉 if you are using velocity package
 
+```javascript
+'^vlocity_ins/omniscriptBaseMixin$': '<rootDir>/force-app/test/jest-mocks/omniscriptBaseMixin.js',
+```
 ---
 
 ### 3️⃣ **Write the Jest Test**  
 
-🧪 Test your component in `omnistudioLightningWebComponent.test.js`.  
+🧪 Test your component `omnistudioLightningWebComponent.test.js`.  
 
 ```javascript
 import { createElement } from "lwc";
-import { mockOmniscriptBaseMixing } from "utils/omnistudio";
-
-const OmniscriptBaseMixinMock = mockOmniscriptBaseMixing("omnistudio/omniscriptBaseMixin");
-const OmnistudioLightningWebComponent = require("c/omnistudioLightningWebComponent").default;
+import { OmniscriptBaseMixin } from "omnistudio/omniscriptBaseMixin";
+import OmnistudioLightningWebComponent from "c/omnistudioLightningWebComponent";
 
 describe("c-omnistudio-lightning-web-component", () => {
   afterEach(() => {
     while (document.body.firstChild) {
       document.body.removeChild(document.body.firstChild);
     }
+
     jest.clearAllMocks();
   });
 
-  it("tests the LWC behavior", async () => {
-    // 🎯 ARRANGE
-    const element = createElement("c-omnistudio-lightning-web-component", {
+  it("test desktop", async () => {
+    // ARRANGE
+    const element = createElement("c-facility-details-l-w-c", {
       is: OmnistudioLightningWebComponent
     });
-    const omni = OmniscriptBaseMixinMock.mocks.instance[0];
-    omni.omniJsonData.mockReturnValue({ mocked: 'prop' });
-    omni.omniRemoteCall.mockResolvedValueOnce({ mocked: 'promise' });
-
+    const omni = OmniscriptBaseMixin.instances[0];
+    omni.omniJsonData = { mocked: 'prop'};
+    omni.omniRemoteCall.mockResolvedValueOnce({ mocked: 'promise'});
     document.body.appendChild(element);
+
     await Promise.resolve();
 
-    // ✅ ASSERT
     expect(omni.omniApplyCallResp).toHaveBeenCalledWith({ updated: true });
   });
+  
 });
 ```
 
 ---
 
-### 📝 **Notes**  
-👉 Always use `require` instead of `import` for your LWC to ensure `OmniscriptBaseMixin` is mocked **before** your `lwc` component is defined.  
+### 📝 **More**  
+👉 if you want to have more control over the **properties** you can use
+  - `Object.getOwnPropertyDescriptor(object, 'property').get` or
+  - `Object.getOwnPropertyDescriptor(object, 'property').set`
+
+
+This can be usefull for properties such as `showValidation` that can change without user/component interaction
+
+```javascript
+const omni = OmniscriptBaseMixin.instances[0];
+
+// for example mocking multiple usages of the property
+Object.getOwnPropertyDescriptor(omni, 'omniJsonData').get
+  .mockReturnValueOnce({ mocked: 'first'})
+  .mockReturnValueOnce({ mocked: 'second'});
+console.log(omni.omniJsonData); // { mocked: 'first'}
+console.log(omni.omniJsonData); // { mocked: 'second'}
+
+// or making sure the propery value changed
+omni.omniJsonData = 'valueChanged';
+expect(Object.getOwnPropertyDescriptor(omni, 'omniJsonData').set)
+  .toHaveBeenCalledWith('valueChanged');
+```
 
 ---
 
