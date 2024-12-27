@@ -97,4 +97,13 @@ git push -u origin master
 git clone git@github.com:username/repository.git
 ```
 
+
+## 🚀 **Stick to the basics**  
+Accep sometimes you might just end up doing 
+```bash
+eval $(ssh-agent -s)
+ssh-add /c/Users/santi/.ssh/santiagoparradev@gmail.com/id_ed25519
+git clone git@github.com:santiagoparradev/my-repository.git
+```
+
 🎉 Enjoy seamless Git operations with your SSH keys configured!
